@@ -145,6 +145,62 @@ for ARTICLE in ARTICLES.glob("*.md"):
     html_file.write_text(html, encoding="utf-8")
     print(f"{ARTICLE.name} を変換しました")
 
+# ===== index.htmlを作成 =====
+
+index_html = """<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+     content="width=device-width, initial-scale=1">
+
+<title>こじかノート</title>
+
+<link rel="stylesheet"
+     href="assets/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<h1>
+<img src="assets/logo.svg" alt="こじかノート">
+こじかノート
+</h1>
+
+</header>
+
+<main>
+
+<h2>こじかノート</h2>
+
+<p>
+小児科医が、子どもに関する医学情報を
+わかりやすく整理するサイトです。
+</p>
+
+</main>
+
+<footer>
+
+<p>© 2026 こじかノート</p>
+
+</footer>
+
+</body>
+
+</html>
+"""
+
+index_file = OUTPUT / "index.html"
+index_file.write_text(index_html, encoding="utf-8")
+
+print("index.htmlを作成しました")
 print()
 print("=====")
 print("すべての記事のHTMLを生成しました!")
