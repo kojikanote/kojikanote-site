@@ -1,0 +1,266 @@
+/* ---------- 基本設定 ---------- */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    font-family:
+        "Yu Gothic",
+        "Hiragino Sans",
+        sans-serif;
+
+    color: #333;
+
+    background: #fafafa;
+
+    line-height: 1.9;
+}
+
+
+/* ---------- ヘッダー ---------- */
+
+header {
+    background: white;
+
+    border-bottom: 1px solid #ddd;
+
+    padding: 20px;
+}
+
+header h1 {
+    display: flex;
+
+    align-items: center;
+
+    gap: 0.25rem;
+
+    margin: 0;
+
+    font-size: 1.6rem;
+}
+
+header h1 img {
+    width: 100px;
+    height: 100px;
+}
+
+
+/* ---------- 記事 ---------- */
+
+main {
+    max-width: 800px;
+
+    margin: auto;
+
+    padding: 40px 24px;
+}
+
+article {
+    background: white;
+
+    padding: 40px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+}
+
+
+/* ---------- 見出し ---------- */
+
+h1 {
+    margin-top: 0;
+
+    font-size: 2rem;
+}
+
+h2 {
+    margin-top: 48px;
+
+    padding-bottom: 8px;
+
+    border-bottom: 3px solid #4CAF50;
+}
+
+h3 {
+    margin-top: 36px;
+}
+
+
+/* ---------- 本文 ---------- */
+
+p {
+    margin: 1em 0;
+}
+
+
+/* ---------- 結論 ---------- */
+
+.conclusion {
+    background: #f2f8ed;
+
+    margin: 32px 0;
+
+    padding: 24px 28px;
+
+    border-radius: 12px;
+
+    border-left: 6px solid #4CAF50;
+}
+
+.conclusion h2 {
+    margin-top: 0;
+
+    margin-bottom: 20px;
+
+    padding-bottom: 8px;
+
+    border-bottom: none;
+}
+
+.conclusion p,
+.conclusion li {
+    font-size: 1.15rem;
+
+    font-weight: 500;
+
+    line-height: 1.9;
+}
+
+
+/* ---------- 解説 ---------- */
+
+.explanation {
+    margin: 32px 0;
+}
+
+.explanation p,
+.explanation li {
+    font-size: 1.05rem;
+
+    line-height: 2;
+}
+
+
+/* ---------- 関連資料 ---------- */
+
+.references {
+    background: #f7f7f7;
+
+    margin: 48px 0 32px;
+
+    padding: 24px 28px;
+
+    border-radius: 10px;
+
+    color: #444;
+}
+
+.references h2 {
+    margin-top: 0;
+
+    font-size: 1.5rem;
+}
+
+.references p,
+.references li {
+    font-size: 0.95rem;
+
+    line-height: 1.8;
+}
+
+
+/* ---------- 小児科医のコメント ---------- */
+
+.doctor-comment {
+    background: #f8f6f0;
+
+    margin: 48px 0 32px;
+
+    padding: 24px 28px;
+
+    border-radius: 12px;
+
+    border-left: 6px solid #999;
+}
+
+.doctor-comment h2 {
+    margin-top: 0;
+
+    border-bottom: none;
+}
+
+.doctor-comment p,
+.doctor-comment li {
+    font-size: 1.05rem;
+
+    line-height: 2;
+}
+
+
+/* ---------- リスト ---------- */
+
+ul {
+    padding-left: 1.5em;
+}
+
+li {
+    margin: .4em 0;
+}
+
+
+/* ---------- コード ---------- */
+
+code {
+    background: #f3f3f3;
+
+    padding: 2px 6px;
+
+    border-radius: 4px;
+}
+
+pre {
+    background: #272822;
+
+    color: white;
+
+    padding: 16px;
+
+    overflow: auto;
+
+    border-radius: 8px;
+}
+
+
+/* ---------- 表 ---------- */
+
+table {
+    border-collapse: collapse;
+
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+
+    padding: 10px;
+}
+
+th {
+    background: #f4f4f4;
+}
+
+
+/* ---------- フッター ---------- */
+
+footer {
+    text-align: center;
+
+    padding: 30px;
+
+    color: #888;
+}
