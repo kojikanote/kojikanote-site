@@ -74,6 +74,8 @@ def add_sections(html_text):
     """
     結論・解説・関連資料・小児科医のコメントを
     <section>で囲む。
+
+    「関連資料」だけは <details> で折りたたむ。
     """
 
     sections = {
@@ -84,6 +86,7 @@ def add_sections(html_text):
     }
 
     current_section = None
+    current_is_references = False
 
     lines = html_text.splitlines()
     result = []
@@ -102,20 +105,49 @@ def add_sections(html_text):
             # このh2が4つのセクションのどれか？
             if title in sections:
 
-                # すでにsectionが開いていたら閉じる
+                # すでにsection/detailsが開いていたら閉じる
                 if current_section is not None:
-                    result.append("</section>")
+                    if current_is_references:
+                        result.append("</div>")
+                        result.append("</details>")
+                    else:
+                        result.append("</section>")
 
                 # CSS用のclass名
                 class_name = sections[title]
 
-                # sectionを開始
-                result.append(
-                    f'<section class="{class_name}">'
-                )
+                # --------------------------------
+                # 関連資料だけ折りたたむ
+                # --------------------------------
+                if title == "関連資料":
 
-                # h2自体はそのまま残す
-                result.append(line)
+                    result.append(
+                        '<details class="references">'
+                    )
+
+                    result.append(
+                        '<summary>関連資料</summary>'
+                    )
+
+                    result.append(
+                        '<div class="references-content">'
+                    )
+
+                    current_is_references = True
+
+                # --------------------------------
+                # その他のセクション
+                # --------------------------------
+                else:
+
+                    result.append(
+                        f'<section class="{class_name}">'
+                    )
+
+                    # h2自体はそのまま残す
+                    result.append(line)
+
+                    current_is_references = False
 
                 current_section = class_name
 
@@ -124,12 +156,16 @@ def add_sections(html_text):
         # 普通の行はそのまま追加
         result.append(line)
 
-    # 最後のsectionを閉じる
+    # 最後のsection/detailsを閉じる
     if current_section is not None:
-        result.append("</section>")
+
+        if current_is_references:
+            result.append("</div>")
+            result.append("</details>")
+        else:
+            result.append("</section>")
 
     return "\n".join(result)
-
 
 # ============================================================
 # Frontmatterを読み取る
@@ -165,12 +201,54 @@ def read_article(article_path):
 
     return data, body
 
+# ============================================================
+# Markdown → HTML
+# ============================================================
+# ============================================================
+# ObsidianリンクをHTMLリンクに変換
+# ============================================================
+
+def convert_obsidian_links(md_text, article_map):
+    """
+    本文中の [[記事名]] をHTMLリンクに変換する。
+    """
+
+    for title, filename in article_map.items():
+
+        obsidian_link = f"[[{title}]]"
+
+        html_link = (
+            f'<a href="{html.escape(filename)}">'
+            f'{html.escape(title)}'
+            f'</a>'
+        )
+
+        md_text = md_text.replace(
+            obsidian_link,
+            html_link
+        )
+
+    return md_text
+
 
 # ============================================================
 # Markdown → HTML
 # ============================================================
 
-def markdown_to_html(md_text):
+def markdown_to_html(md_text, article_map):
+
+    # --------------------------------------------------------
+    # ObsidianリンクをHTMLリンクに変換
+    # --------------------------------------------------------
+
+    md_text = convert_obsidian_links(
+        md_text,
+        article_map
+    )
+
+    # --------------------------------------------------------
+    # Markdown → HTML
+    # --------------------------------------------------------
 
     body = markdown.markdown(
         md_text,
@@ -186,7 +264,6 @@ def markdown_to_html(md_text):
 
     return body
 
-
 # ============================================================
 # Markdownファイルの最終更新日を取得
 # ============================================================
@@ -199,13 +276,168 @@ def get_update_date(article_path):
 
     return f"{date.year}年{date.month}月{date.day}日"
 
+# ============================================================
+# 公開記事をすべて読み込む
+# ============================================================
+
+def load_articles():
+
+    articles = []
+
+    for article_path in ARTICLES.glob("*.md"):
+
+        result = read_article(article_path)
+
+        if result is None:
+            continue
+
+        data, md_body = result
+
+        # statusを確認
+        status = data.get("status")
+
+        if status != "公開":
+            continue
+
+        title = data.get("title", article_path.stem)
+
+        categories = data.get("categories", [])
+
+        if not isinstance(categories, list):
+            categories = [categories]
+
+        related = data.get("related", [])
+
+        if not isinstance(related, list):
+            related = [related]
+
+        articles.append({
+            "path": article_path,
+            "title": title,
+            "categories": categories,
+            "related": related,
+            "data": data,
+            "body": md_body,
+            "filename": f"{article_path.stem}.html",
+        })
+
+    return articles
+
+# ============================================================
+# 関連記事を解析する
+# ============================================================
+
+def build_related_map(articles, article_map):
+    """
+    各記事のrelatedから関連記事を取得する。
+
+    Obsidianの [[記事名]] を読み取り、
+    記事タイトルをキーにして関連関係を作る。
+
+    A → B と指定されていた場合、
+    自動的に B → A も追加する。
+    """
+
+    related_map = {}
+
+    # --------------------------------------------------------
+    # まず、すべての記事に空の関連記事リストを作る
+    # --------------------------------------------------------
+
+    for article in articles:
+
+        title = article["title"]
+
+        related_map[title] = []
+
+    # --------------------------------------------------------
+    # Frontmatterのrelatedを読み込む
+    # --------------------------------------------------------
+
+    for article in articles:
+
+        title = article["title"]
+
+        for related in article["related"]:
+
+            # [[記事名]] → 記事名
+            if isinstance(related, str):
+
+                related_title = related.strip()
+
+                if (
+                    related_title.startswith("[[")
+                    and related_title.endswith("]]")
+                ):
+
+                    related_title = related_title[2:-2].strip()
+
+                else:
+
+                    print(
+                        f"  ⚠ relatedの形式が正しくありません: "
+                        f"{title} → {related}"
+                    )
+
+                    continue
+
+            else:
+
+                continue
+
+            # ------------------------------------------------
+            # 公開記事として存在するか確認
+            # ------------------------------------------------
+
+            if related_title not in article_map:
+
+                print(
+                    f"  ⚠ 関連記事が見つかりません: "
+                    f"{title} → {related_title}"
+                )
+
+                continue
+
+            # ------------------------------------------------
+            # 自分自身へのリンクは除外
+            # ------------------------------------------------
+
+            if related_title == title:
+                continue
+
+            # ------------------------------------------------
+            # A → B を追加
+            # ------------------------------------------------
+
+            if related_title not in related_map[title]:
+
+                related_map[title].append(
+                    related_title
+                )
+
+            # ------------------------------------------------
+            # B → A を自動追加
+            # ------------------------------------------------
+
+            if title not in related_map[related_title]:
+
+                related_map[related_title].append(
+                    title
+                )
+
+    return related_map
 
 # ============================================================
 # 記事HTMLを作る
 # ============================================================
 
-def create_article_html(article_path, data, body):
-
+def create_article_html(
+    article_path,
+    data,
+    body,
+    related_articles,
+    article_map
+):
     title = data.get("title", article_path.stem)
 
     categories = data.get("categories", [])
@@ -222,7 +454,36 @@ def create_article_html(article_path, data, body):
 
     # 最終更新日
     update_date = get_update_date(article_path)
+    # --------------------------------------------------------
+    # 関連記事
+    # --------------------------------------------------------
 
+    related_html = ""
+
+    if related_articles:
+
+        related_links = []
+
+        for related_title in related_articles:
+
+            related_filename = article_map[related_title]
+
+            related_links.append(
+                f'<li>'
+                f'<a href="{html.escape(related_filename)}">'
+                f'{html.escape(related_title)}'
+                f'</a>'
+                f'</li>'
+            )
+
+        related_html = f"""
+<section class="related">
+<h2>関連する記事</h2>
+<ul>
+{chr(10).join(related_links)}
+</ul>
+</section>
+"""
     # --------------------------------------------------------
     # パンくずリスト
     # --------------------------------------------------------
@@ -279,7 +540,9 @@ def create_article_html(article_path, data, body):
 
 <link rel="stylesheet"
      href="assets/style.css">
-
+<link rel="icon"
+     type="image/svg+xml"
+     href="assets/favicon.svg">
 </head>
 
 <body>
@@ -304,6 +567,8 @@ def create_article_html(article_path, data, body):
 <p class="update-date">
 最終更新日：{update_date}
 </p>
+
+{related_html}
 
 </article>
 
@@ -378,7 +643,9 @@ def create_category_page(category, articles):
 
 <link rel="stylesheet"
      href="../assets/style.css">
-
+<link rel="icon"
+     type="image/svg+xml"
+     href="../assets/favicon.svg">
 </head>
 
 <body>
@@ -462,7 +729,9 @@ def create_index(categories):
 
 <link rel="stylesheet"
      href="assets/style.css">
-
+<link rel="icon"
+     type="image/svg+xml"
+     href="assets/favicon.svg">
 </head>
 
 <body>
@@ -526,6 +795,19 @@ def main():
     print()
 
     # --------------------------------------------------------
+    # 以前生成したHTMLを削除
+    # --------------------------------------------------------
+
+    print("以前のHTMLを削除しています...")
+
+    for html_file in OUTPUT.glob("*.html"):
+        html_file.unlink()
+        print(f"  → {html_file.name} を削除")
+
+    print()
+
+
+    # --------------------------------------------------------
     # Categories.mdを読み込む
     # --------------------------------------------------------
 
@@ -542,11 +824,49 @@ def main():
     print()
 
     # --------------------------------------------------------
-    # categoryフォルダを作る
+    # 公開記事をすべて読み込む
+    # --------------------------------------------------------
+
+    articles = load_articles()
+
+    print(f"公開記事数：{len(articles)}")
+    print()
+    # --------------------------------------------------------
+    # 記事タイトルとHTMLファイル名の対応表
+    # --------------------------------------------------------
+
+    article_map = {}
+
+    for article in articles:
+        article_map[article["title"]] = article["filename"]
+
+    # --------------------------------------------------------
+    # 関連記事の関係を作る
+    # --------------------------------------------------------
+
+    related_map = build_related_map(
+        articles,
+        article_map
+    )
+    print("関連記事：")
+
+    for title, related_titles in related_map.items():
+
+        if related_titles:
+            print(f"  {title}")
+            for related_title in related_titles:
+                print(f"    → {related_title}")
+
+    print()
+
+    # --------------------------------------------------------
+    # categoryフォルダを作り直す
     # --------------------------------------------------------
 
     category_output = OUTPUT / "category"
-
+    if category_output.exists(): 
+        for html_file in category_output.glob("*.html"): 
+            html_file.unlink()
     category_output.mkdir(exist_ok=True)
 
     # --------------------------------------------------------
@@ -619,8 +939,10 @@ def main():
         # ----------------------------------------------------
         # Markdown → HTML
         # ----------------------------------------------------
-
-        body = markdown_to_html(md_body)
+        body = markdown_to_html(
+            md_body,
+            article_map
+        )
 
         # ----------------------------------------------------
         # 記事HTMLを作る
@@ -629,7 +951,9 @@ def main():
         article_html = create_article_html(
             article_path,
             data,
-            body
+            body,
+            related_map[data.get("title", article_path.stem)],
+            article_map
         )
 
         html_file = OUTPUT / f"{article_path.stem}.html"

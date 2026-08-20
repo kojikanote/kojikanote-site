@@ -134,6 +134,7 @@ title: "${title}"
 status: "${status}"
 categories:
 ${allCategories.map(category => `  - "${category}"`).join("\n")}
+related:
 ---
 
 # ${title}
