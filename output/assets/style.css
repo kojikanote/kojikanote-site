@@ -198,27 +198,21 @@ blockquote {
 /* ---------- 小児科医のコメント ---------- */
 
 .doctor-comment {
-    background: transparent;
-
+    background: #f3f5f2;
     margin: 48px 0 32px;
-
-    padding: 0;
-
-    border-radius: 0;
-
-    border-left: none;
+    padding: 24px 28px;
+    border-radius: 12px;
+    border-left: 6px solid #7b8f82;
 }
 
 .doctor-comment h2 {
     margin-top: 0;
-
     border-bottom: none;
 }
 
 .doctor-comment p,
 .doctor-comment li {
     font-size: 1.05rem;
-
     line-height: 2;
 }
 
@@ -436,16 +430,15 @@ footer {
 
     .doctor-comment {
         margin: 40px 0 28px;
-        padding: 0;
-        border-radius: 0;
-        border-left: none;
-        background: transparent
+        padding: 18px 16px;
+        border-radius: 10px;
+        border-left: 5px solid #7b8f82;
+        background: #f3f5f2
     }
 
     .doctor-comment p,
     .doctor-comment li {
         font-size: 1rem;
-
         line-height: 1.9;
     }
 
