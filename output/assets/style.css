@@ -8,17 +8,28 @@ body {
     margin: 0;
 
     font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
         "Yu Gothic",
         "Hiragino Sans",
         sans-serif;
 
     color: #333;
-
-    background: #fafafa;
-
+    background: #fffdf7;
     line-height: 1.9;
 }
 
+body.noto-loaded {
+    font-family:
+        "Noto Sans JP",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Yu Gothic",
+        "Hiragino Sans",
+        sans-serif;
+}
 
 /* ---------- ヘッダー ---------- */
 
@@ -59,13 +70,13 @@ main {
 }
 
 article {
-    background: white;
+    background: #fffdf7;
 
     padding: 40px;
 
     border-radius: 12px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+    box-shadow: none;
 }
 
 
@@ -187,15 +198,15 @@ blockquote {
 /* ---------- 小児科医のコメント ---------- */
 
 .doctor-comment {
-    background: #f8f6f0;
+    background: transparent;
 
     margin: 48px 0 32px;
 
-    padding: 24px 28px;
+    padding: 0;
 
-    border-radius: 12px;
+    border-radius: 0;
 
-    border-left: 6px solid #999;
+    border-left: none;
 }
 
 .doctor-comment h2 {
@@ -304,7 +315,7 @@ footer {
 
         margin: 0;
 
-        padding: 24px 16px;
+        padding: 24px 12px;
     }
 
     article {
@@ -425,12 +436,10 @@ footer {
 
     .doctor-comment {
         margin: 40px 0 28px;
-
-        padding: 18px 16px;
-
-        border-radius: 10px;
-
-        border-left-width: 5px;
+        padding: 0;
+        border-radius: 0;
+        border-left: none;
+        background: transparent
     }
 
     .doctor-comment p,
