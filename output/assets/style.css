@@ -198,11 +198,11 @@ blockquote {
 /* ---------- 小児科医のコメント ---------- */
 
 .doctor-comment {
-    background: #f3f5f2;
+    background: #f4eee9;
     margin: 48px 0 32px;
     padding: 24px 28px;
-    border-radius: 12px;
-    border-left: 6px solid #7b8f82;
+    border-radius: none;
+    border-left: none;
 }
 
 .doctor-comment h2 {
@@ -431,9 +431,9 @@ footer {
     .doctor-comment {
         margin: 40px 0 28px;
         padding: 18px 16px;
-        border-radius: 10px;
-        border-left: 5px solid #7b8f82;
-        background: #f3f5f2
+        border-radius: none;
+        border-left: none;
+        background: #f4eee9;
     }
 
     .doctor-comment p,
